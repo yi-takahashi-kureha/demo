@@ -1,4 +1,6 @@
-# demo
+# Project.demo
+
+### docker-compose up -d --build
 
 ```bash:bash
   % ll
