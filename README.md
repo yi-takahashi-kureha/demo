@@ -35,3 +35,15 @@ Laravelプロジェクトが /var/www/html（ホストマシンの crud-app デ�
 root@de62d9c359f7:/var/www/html# cd /var/www/html
 root@de62d9c359f7:/var/www/html# composer create-project --prefer-dist laravel/laravel . "10.*"
 ```
+
+----
+
+.envファイルを修正
+```.env:.env
+DB_CONNECTION=mysql
+DB_HOST=mysql          # ← 変更: Docker Composeのサービス名 'mysql' を指定します
+DB_PORT=3306
+DB_DATABASE=laravel_db # ← 変更: docker-compose.yml で MYSQL_DATABASE に設定した値
+DB_USERNAME=laravel_user # ← 変更: docker-compose.yml で MYSQL_USER に設定した値
+DB_PASSWORD=password     # ← 変更: docker-compose.yml で MYSQL_PASSWORD に設定した値
+```
