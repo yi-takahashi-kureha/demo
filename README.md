@@ -27,3 +27,11 @@ docker/web:
 total 8
 -rw-r--r--  1 metchakureha  staff  279  5 16 22:31 default.conf
 ```
+
+### Laravel:install
+Laravelプロジェクトが /var/www/html（ホストマシンの crud-app ディレクトリにマウントされている場所）に作成され、.env.example が .env にコピーされ、アプリケーションキーも設定。
+```
+  % docker-compose exec app bash
+root@de62d9c359f7:/var/www/html# cd /var/www/html
+root@de62d9c359f7:/var/www/html# composer create-project --prefer-dist laravel/laravel . "10.*"
+```
