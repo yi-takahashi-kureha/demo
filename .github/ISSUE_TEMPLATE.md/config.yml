@@ -1,0 +1,9 @@
+blank_issues_enabled: false # trueにするとテンプレートを使わない空のIssue作成を許可します。false推奨。
+contact_links:
+  - name: 質問や相談はこちら (例: LINEorDiscordチャンネル)
+    url: https://your-slack-workspace.slack.com/archives/your-channel # 実際のURLに置き換えてください
+    about: Issueを立てる前に、まずは気軽に質問や相談をしたい場合はこちらへ。
+  - name: プロジェクトドキュメント
+    url: https://github.com/your-org/your-repo/wiki # プロジェクトのWikiやドキュメントのURLに置き換えてください
+    about: まずはドキュメントをご確認ください。
+
