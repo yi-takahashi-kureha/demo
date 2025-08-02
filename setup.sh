@@ -10,31 +10,23 @@ YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# --- Docker実行権限チェックと自動修正 ---
+# Docker実行権限チェックと自動修正
 echo -e "${YELLOW}Dockerの実行権限を確認しています...${NC}"
 if ! docker info > /dev/null 2>&1; then
     echo -e "${RED}エラー: Dockerコマンドの実行権限がありません。${NC}"
-    echo "これは現在のユーザーが 'docker' グループに所属していないことが原因です。"
-
-    # ユーザーにsudoでのコマンド実行を許可してもらう
     read -p "スクリプトが自動で権限を付与しますか？ (sudo usermod -aG docker \$USER を実行します) [y/N]: " answer
     if [[ "$answer" =~ ^[Yy]$ ]]; then
         echo "管理者パスワードを入力してください..."
-        # 現在のユーザーをdockerグループに追加する
         sudo usermod -aG docker $USER
-
         echo -e "${GREEN}ユーザーを 'docker' グループに追加しました。${NC}"
-        echo -e "${RED}【重要】変更を有効にするには、一度このターミナルを閉じて、新しいターミナルを開き直す必要があります。${NC}"
-        echo "お手数ですが、ターミナルを再起動してから、もう一度このスクリプト(./setup.sh)を実行してください。"
+        echo -e "${RED}【重要】変更を有効にするには、ターミナルを再起動してから、もう一度このスクリリプトを実行してください。${NC}"
         exit 1
     else
-        echo "処理を中断しました。手動で権限を付与してから、再度スクリプトを実行してください。"
-        echo "実行するコマンド: sudo usermod -aG docker \$USER"
+        echo "処理を中断しました。"
         exit 1
     fi
 fi
 echo -e "${GREEN}Dockerの実行権限OK。${NC}"
-# --- チェック完了 ---
 
 echo -e "${BLUE}Laravel Docker環境セットアップを開始します...${NC}"
 
@@ -58,6 +50,9 @@ echo -e "${YELLOW}ステップ3: docker/app/Dockerfile を作成しています.
 cat <<EOF > docker/app/Dockerfile
 FROM php:8.2-fpm
 
+ARG UID
+ARG GID
+
 RUN apt-get update && apt-get install -y \\
     git curl zip unzip libpng-dev libjpeg62-turbo-dev libfreetype6-dev \\
     libzip-dev libonig-dev libxml2-dev \\
@@ -69,7 +64,13 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-RUN usermod -u \${UID} www-data && groupmod -g \${GID} www-data
+# --- [修正] GIDの衝突を解決するロジックを追加 ---
+RUN EXISTING_GID_GROUP_NAME=\$(getent group \${GID} | cut -d: -f1); \\
+    if [ -n "\$EXISTING_GID_GROUP_NAME" ] && [ "\$EXISTING_GID_GROUP_NAME" != "www-data" ]; then \\
+        groupdel "\$EXISTING_GID_GROUP_NAME"; \\
+    fi; \\
+    groupmod -g \${GID} www-data; \\
+    usermod -u \${UID} www-data;
 
 CMD ["php-fpm"]
 EOF
